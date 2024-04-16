@@ -3,7 +3,7 @@ import React from 'react'
 
 function Home() {
   return (
-    <div>Home</div>
+    <div className='flex items-center justify-center align-middle h-full'><h1>Select a friend to Chat.</h1></div>
   )
 }
 

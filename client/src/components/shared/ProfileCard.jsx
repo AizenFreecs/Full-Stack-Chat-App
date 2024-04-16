@@ -11,15 +11,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { HiAtSymbol } from "react-icons/hi2";
 import { Label } from "../ui/label";
 import { SlCalender } from "react-icons/sl";
-import { FaUserFriends } from "react-icons/fa";
+import { FaUserFriends, FaArrowLeft } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
+import { GoArrowLeft } from "react-icons/go";
+import moment from "moment";
 
 function ProfileCard() {
   return (
-      <div>
-          <div>
-              <FiLogOut/>
-          </div>
+    <div>
+      <div className="bg-white flex items-center justify-between h-[3rem] px-4 py-2 w-full rounded-md mb-4">
+        <GoArrowLeft className="mx-4 h-[1.5rem] w-[1.5rem] cursor-pointer hover:scale-110"/>
+        <div className="flex gap-2 px-4 py-2 cursor-pointer rounded-md hover:scale-110 hover:text-red-500 items-center justify-between">
+          <h1>Logout</h1>
+        <FiLogOut className="h-[1.5rem] w-[1.5rem]" />
+        </div>
+      </div>
+
       <Card className="drop-shadow-2xl flex flex-col  items-center">
         <CardHeader className="flex flex-col items-center gap-2">
           <CardTitle className="text-4xl text-center text-gray-600">
@@ -47,7 +54,7 @@ function ProfileCard() {
           </div>
           <div className="flex flex-col items-center">
             <SlCalender />
-            <h1>Joined on Date this.</h1>
+            <h1>Joined {moment('2024-01-04T18:40:00.000Z').fromNow() }</h1>
           </div>
           <div className="flex flex-col items-center">
             <FaUserFriends />
