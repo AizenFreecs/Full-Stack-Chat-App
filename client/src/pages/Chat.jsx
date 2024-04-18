@@ -5,7 +5,12 @@ import React, { useRef } from "react";
 import { GrAttachment } from "react-icons/gr";
 import { IoSend } from "react-icons/io5";
 import FileMenu from "@/components/features/FileMenu";
-
+import { dummyMessage } from "@/constants/dummyData";
+import MessageComponent from "@/components/shared/MessageComponent";
+const user = {
+  _id: "bfubfef",
+  name:"Bamlaue"
+}
 function Chat() {
   const containerRef = useRef(null);
   return (
@@ -14,7 +19,11 @@ function Chat() {
         ref={containerRef}
         className="w-full h-[90%] flex flex-col item-center p-[1rem] bg-slate-300 overflow-x-hidden overflow-y-auto"
       >
-        
+        {
+          dummyMessage.map((item) => (
+            <MessageComponent message={item} user={user} key={item.id} />
+          ))
+        }
       </div>
       <form className="h-[10%] w-full flex items-center p-1 gap-4">
         <div className="flex w-full h-full items-center md:p-2 ">

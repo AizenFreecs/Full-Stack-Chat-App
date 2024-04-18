@@ -15,6 +15,7 @@ import { FaUserFriends, FaArrowLeft } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import { GoArrowLeft } from "react-icons/go";
 import moment from "moment";
+import { transformImage } from "@/lib/features";
 
 function ProfileCard() {
   return (
@@ -33,7 +34,7 @@ function ProfileCard() {
             My Profile
           </CardTitle>
           <Avatar className="w-[12rem] h-[12rem]">
-            <AvatarImage src="https://www.w3schools.com/howto/img_avatar.png" />
+            <AvatarImage src={transformImage("https://www.w3schools.com/howto/img_avatar.png")} />
             <AvatarFallback>Your Profile Image Here</AvatarFallback>
           </Avatar>
         </CardHeader>

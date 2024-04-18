@@ -27,6 +27,7 @@ import ProfileCard from "../shared/ProfileCard";
 import Notifications from "../features/Notifications";
 import Search from "../features/Search";
 import NewGroups from "../features/NewGroups";
+import Groups from "../features/Groups";
 
 function Header() {
   const [isNotifications, setNotifications] = useState(false);
@@ -75,7 +76,7 @@ function Header() {
               <NewGroups />
             </DialogContent>
           </Dialog>
-          <Dialog>
+          <Dialog >
             <DialogTrigger>
               <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
                 <MdGroups
@@ -84,7 +85,9 @@ function Header() {
                 />
               </div>
             </DialogTrigger>
-            <DialogContent></DialogContent>
+            <DialogContent  className="md:h-[80vh] h-[60vh] md:w-[800px] w-[80vw] rounded-lg">
+              <Groups />
+            </DialogContent>
           </Dialog>
 
           <Popover>

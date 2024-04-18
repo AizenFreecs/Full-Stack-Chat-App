@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { HiOutlineUserAdd, HiOutlineUserRemove } from "react-icons/hi";
 import { Button } from "../ui/button";
+import { transformImage } from "@/lib/features";
 
 function UserCard({
   _id,
@@ -15,7 +16,7 @@ function UserCard({
     <div className="flex items-center justify-between gap-4 px-4 py-2 mx-4 ">
       <div className="flex gap-4 items-center">
         <Avatar>
-          <AvatarImage src={avatar} />
+          <AvatarImage src={transformImage(avatar)} />
           <AvatarFallback>Image not Found</AvatarFallback>
         </Avatar>
         <h1 className="text-xl overflow-hidden overflow-ellipsis">{name}</h1>
