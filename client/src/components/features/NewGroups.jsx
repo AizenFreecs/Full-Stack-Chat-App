@@ -26,7 +26,7 @@ function NewGroups() {
         />
       </div>
       <h1 className="text-xl">Select Members</h1>
-      <div className="text-center w-full overflow-y-auto max-h-[50vh]">
+      <div className=" w-full overflow-y-auto max-h-[50vh]">
         {users.map((item) => (
           <UserCard
             _id={item._id}

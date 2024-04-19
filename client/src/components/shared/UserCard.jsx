@@ -11,9 +11,10 @@ function UserCard({
   handler,
   handlerIsLoading,
   isAdded = false,
+  className=""
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 px-4 py-2 mx-4 ">
+    <div className={`flex items-center justify-between gap-4 px-4 py-2 mx-4 ${className}`}>
       <div className="flex gap-4 items-center">
         <Avatar>
           <AvatarImage src={transformImage(avatar)} />

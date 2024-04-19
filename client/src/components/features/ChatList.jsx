@@ -15,7 +15,7 @@ function ChatList({
   handleDeleteChat,
 }) {
   return (
-    <div className={`w-${width} flex flex-col`}>
+    <div className={`w-${width} flex flex-col overflow-y-auto `}>
       {chats?.map((data, index) => {
         const { avatar, _id, name, groupChat, members } = data;
         const newMessageAlert = newMessagesAlert.find(

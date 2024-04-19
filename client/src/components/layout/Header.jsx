@@ -49,6 +49,7 @@ function Header() {
           </div>
         </div>
         <div className="flex items-center gap-4 justify-between text-white ">
+
           <Dialog>
             <DialogTrigger>
               <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
@@ -59,10 +60,11 @@ function Header() {
                 />
               </div>
             </DialogTrigger>
-            <DialogContent className=" md:w-[500px] w-[80vw] rounded-lg max-h-[80vh]">
+            <DialogContent className=" md:w-[500px] w-[85vw] rounded-lg max-h-[80vh]">
               <Search />
             </DialogContent>
           </Dialog>
+
           <Dialog>
             <DialogTrigger>
               <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
@@ -72,10 +74,11 @@ function Header() {
                 />
               </div>
             </DialogTrigger>
-            <DialogContent className="md:w-[500px] w-[80vw] rounded-lg">
+            <DialogContent className="md:w-[500px] w-[85vw] rounded-lg">
               <NewGroups />
             </DialogContent>
           </Dialog>
+
           <Dialog >
             <DialogTrigger>
               <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">

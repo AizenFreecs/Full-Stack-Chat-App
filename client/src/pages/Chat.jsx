@@ -25,11 +25,11 @@ function Chat() {
           ))
         }
       </div>
-      <form className="h-[10%] w-full flex items-center p-1 gap-4">
+      <form className="h-[10%] w-full flex items-center p-1 gap-4" onSubmit={(e)=>e.preventDefault()}>
         <div className="flex w-full h-full items-center md:p-2 ">
         <FileMenu />
           <Input placeholder="Type your Message" className=" w-full mr-2" />
-          <Button variant="empty" className="hover:text-red-500 ">
+          <Button variant="empty" className="hover:text-red-500 " type="submit">
             <IoSend className="mx-2 h-[1.5rem] w-[1.5rem] cursor-pointer" />
           </Button>
         </div>
