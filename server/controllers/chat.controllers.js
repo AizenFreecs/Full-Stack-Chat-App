@@ -1,16 +1,16 @@
-import { TryCatch } from "../middlewares/error.js";
-import { ErrorHandler } from "../utils/apiError.js";
-import { Chat } from "../models/chat.model.js";
-import { deleteCloudinaryFiles, emitEvent } from "../utils/features.js";
 import {
   ALERT,
   NEW_ATTACHEMENT,
-  REFETCH_CHATS,
   NEW_MESSAGE_ALERT,
+  REFETCH_CHATS,
 } from "../constants/events.js";
-import { getOtherMember } from "../utils/helper.js";
-import { User } from "../models/user.model.js";
+import { TryCatch } from "../middlewares/error.js";
+import { Chat } from "../models/chat.model.js";
 import { Message } from "../models/message.model.js";
+import { User } from "../models/user.model.js";
+import { ErrorHandler } from "../utils/apiError.js";
+import { deleteCloudinaryFiles, emitEvent } from "../utils/features.js";
+import { getOtherMember } from "../utils/helper.js";
 
 const getMyChats = TryCatch(async (req, res, next) => {
   const chats = await Chat.find({ members: req.user }).populate(
@@ -211,17 +211,20 @@ const leaveGroup = TryCatch(async (req, res, next) => {
 
 const sendAttachements = TryCatch(async (req, res, next) => {
   const { chatId } = req.body;
+  const files = req.files || [];
+
+  if (files.length < 1)
+    return next(new ErrorHandler("Please upload attachements", 404));
+  if(files.length >10) return next(new ErrorHandler("Files can't be more than 5",400))
 
   const [chat, user] = await Promise.all([
     Chat.findById(chatId),
     User.findById(req.user, "name"),
   ]);
 
-  const files = req.files || [];
   const attachements = [];
 
   if (!chat) return next(new ErrorHandler("Chat not found", 404));
-  if (files.length < 0) return next(new ErrorHandler("File not found", 404));
 
   const msgForRealTime = {
     content: "",
@@ -357,34 +360,26 @@ const getMessages = TryCatch(async (req, res, next) => {
   const limit = 20;
   const skip = (page - 1) * limit;
 
-  const [messages,totalMessageCount] = await Promise.all([
+  const [messages, totalMessageCount] = await Promise.all([
     Message.find({ chat: chatId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("sender", "name")
       .lean(),
-    Message.countDocuments({ chat: chatId })
+    Message.countDocuments({ chat: chatId }),
   ]);
 
-  const totalPages = Math.ceil(totalMessageCount / limit)
+  const totalPages = Math.ceil(totalMessageCount / limit);
 
   return res.status(200).json({
     success: true,
     messages: messages.reverse(),
-    totalPages
-  })
+    totalPages,
+  });
 });
 export {
-  newGroupChat,
-  getMyChats,
-  getMyGroups,
-  addMembers,
-  removeMember,
-  leaveGroup,
-  sendAttachements,
-  getChatDetails,
-  renameGroup,
-  deleteChat,
-  getMessages,
+  addMembers, deleteChat, getChatDetails, getMessages, getMyChats,
+  getMyGroups, leaveGroup, newGroupChat, removeMember, renameGroup, sendAttachements
 };
+
