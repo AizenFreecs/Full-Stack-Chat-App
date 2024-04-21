@@ -6,7 +6,8 @@ import cookieParser from "cookie-parser";
 import { createUser } from "./seeders/user.seed.js";
 
 import userRoutes from "./routes/user.routes.js";
-import chatRoutes from './routes/chat.routes.js'
+import chatRoutes from "./routes/chat.routes.js";
+import { createGroupChats, createMessagesInAChat, createSingleChats } from "./seeders/chat.seeder.js";
 
 dotenv.config({
   path: "./.env",
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 3000;
 connectDB(mongoURI);
 
 
+
 const app = express();
 
 // Midllewares
@@ -26,8 +28,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/user", userRoutes);
-app.use("/chat",chatRoutes)
-
+app.use("/chat", chatRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello Aizen");
