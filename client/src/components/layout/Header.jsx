@@ -1,42 +1,44 @@
-import React, { useState, Suspense } from "react";
-import { CiMenuBurger, CiCirclePlus } from "react-icons/ci";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { useMyChatsQuery } from "@/redux/api/api";
+import { useState } from "react";
+import { CgProfile } from "react-icons/cg";
+import { CiCirclePlus, CiMenuBurger } from "react-icons/ci";
+import { FaBell } from "react-icons/fa6";
 import { IoIosSearch } from "react-icons/io";
 import { MdGroups } from "react-icons/md";
-import { FaBell } from "react-icons/fa6";
-import { CgProfile } from "react-icons/cg";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
-import ProfileCard from "../shared/ProfileCard";
-import Notifications from "../features/Notifications";
-import Search from "../features/Search";
-import NewGroups from "../features/NewGroups";
 import Groups from "../features/Groups";
+import NewGroups from "../features/NewGroups";
+import Notifications from "../features/Notifications";
+import { useParams } from "react-router-dom";
+import Search from "../features/Search";
+import ProfileCard from "../shared/ProfileCard";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Skeleton } from "../ui/skeleton";
+import ChatList from "../features/ChatList";
+import { useSelector } from "react-redux";
 
 function Header() {
   const [isNotifications, setNotifications] = useState(false);
+  const params = useParams();
+  const chatId = params.chatId;
+  const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
+  const {user } = useSelector((state) => state.auth);
+
+  const {} = useSelector((state) => state.misc);
+
   const handleSearch = () => {
     console.log("Search function");
   };
   const handleNotifications = () => {
     setNotifications(true);
   };
+
+  const handleDeleteChat = (e, _id, groupChat) => {
+    e.preventDefault();
+    console.log("Chat Deleted", _id, groupChat);
+  };
+
   return (
     <header className="h-[4rem] bg-orange-400">
       <nav className=" flex  lg:flex-row justify-between z-50 h-full py-2  px-4">
@@ -44,12 +46,39 @@ function Header() {
           <span className="items-center pt-3 hidden md:block">
             Aizen's Chat
           </span>
-          <div className="md:hidden items-center align-middle text-white">
+          <Drawer>
+            <DrawerTrigger>
+              <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+                <CiMenuBurger
+                  className="h-[1.5rem] w-[1.5rem]"
+                  onClick={handleNotifications}
+                  title="Notifications"
+                />
+              </div>
+            </DrawerTrigger>
+            <DrawerContent className="bg-orange-400">
+              {isLoading ? (
+                <Skeleton />
+              ) : (
+                <ChatList
+                  chats={data.chats}
+                  chatId={chatId}
+                  newMessagesAlert={[
+                    {
+                      chatId,
+                      count: 4,
+                    },
+                  ]}
+                  handleDeleteChat={handleDeleteChat}
+                />
+              )}
+            </DrawerContent>
+          </Drawer>
+          {/* <div className="md:hidden items-center align-middle text-white">
             <CiMenuBurger className="h-[1.5rem] w-[1.5rem] mt-2.5" />
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center gap-4 justify-between text-white ">
-
           <Dialog>
             <DialogTrigger>
               <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
@@ -79,7 +108,7 @@ function Header() {
             </DialogContent>
           </Dialog>
 
-          <Dialog >
+          <Dialog>
             <DialogTrigger>
               <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
                 <MdGroups
@@ -88,7 +117,7 @@ function Header() {
                 />
               </div>
             </DialogTrigger>
-            <DialogContent  className="md:h-[80vh] h-[60vh] md:w-[800px] w-[80vw] rounded-lg">
+            <DialogContent className="md:h-[80vh] h-[60vh] md:w-[800px] w-[80vw] rounded-lg">
               <Groups />
             </DialogContent>
           </Dialog>

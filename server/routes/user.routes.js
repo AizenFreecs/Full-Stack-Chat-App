@@ -9,7 +9,7 @@ const app = express.Router();
 
 
 
-app.post("/new", userAvatar,registerValidator(),validateHandler, newUser);
+app.post("/register", userAvatar,registerValidator(),validateHandler, newUser);
 app.post("/login",loginValidator(),validateHandler, login)
 
 // authentication required from here on

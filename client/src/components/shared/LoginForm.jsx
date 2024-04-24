@@ -1,16 +1,18 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { server } from "@/constants/config";
+import { userExists } from "@/redux/reducers/auth";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 const usernameRegex =
   /^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/;
 
@@ -26,9 +28,41 @@ function LoginForm({ toggleLogin }) {
       password: "",
     },
   });
+  const dispatch = useDispatch();
 
-  const handleSubmitForm = (data) => {
-    console.log(data);
+  const handleSubmitForm = async (formdata) => {
+    console.log(formdata);
+    const config = {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    try {
+      const { data } = await axios.post(
+        `${server}/api/user/login`,
+        {
+          username: formdata.username,
+          password: formdata.password,
+        },
+        {
+          config,
+        }
+      );
+
+      // Saving the login cookie : TODO having error in login backend so did it here . Later move it back to backend
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 7); // Set cookie expiration for 7 days
+      const cookieOptions = `path=/; expires=${expirationDate.toUTCString()}; SameSite=none; Secure`;
+      document.cookie = `login-token=${data.token}; ${cookieOptions}`;
+      console.log(data);
+
+      dispatch(userExists(data.user));
+      toast.success(data.message);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Something went wrong.");
+      console.log(error);
+    }
   };
   return (
     <Card>
@@ -73,7 +107,7 @@ function LoginForm({ toggleLogin }) {
           {errors.password && (
             <span className="text-red-500">{errors.password.message}</span>
           )}
-          
+
           <Button type="submit" className="bg-green-600 hover:bg-green-500">
             Login
           </Button>

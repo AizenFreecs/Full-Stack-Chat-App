@@ -21,7 +21,7 @@ const getMyChats = TryCatch(async (req, res, next) => {
   const transformedChats = chats.map(
     ({ _id, name, groupChat, members = [], lastMessage, avatar }) => {
       const otherMember = getOtherMember(members, req.user);
-      console.log(otherMember);
+      
       return {
         _id,
         groupChat,
@@ -40,7 +40,7 @@ const getMyChats = TryCatch(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: transformedChats,
+    chats:transformedChats,
   });
 });
 
@@ -215,7 +215,8 @@ const sendAttachements = TryCatch(async (req, res, next) => {
 
   if (files.length < 1)
     return next(new ErrorHandler("Please upload attachements", 404));
-  if(files.length >10) return next(new ErrorHandler("Files can't be more than 5",400))
+  if (files.length > 10)
+    return next(new ErrorHandler("Files can't be more than 5", 400));
 
   const [chat, user] = await Promise.all([
     Chat.findById(chatId),
@@ -379,7 +380,15 @@ const getMessages = TryCatch(async (req, res, next) => {
   });
 });
 export {
-  addMembers, deleteChat, getChatDetails, getMessages, getMyChats,
-  getMyGroups, leaveGroup, newGroupChat, removeMember, renameGroup, sendAttachements
+  addMembers,
+  deleteChat,
+  getChatDetails,
+  getMessages,
+  getMyChats,
+  getMyGroups,
+  leaveGroup,
+  newGroupChat,
+  removeMember,
+  renameGroup,
+  sendAttachements,
 };
-

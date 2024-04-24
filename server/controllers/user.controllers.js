@@ -1,6 +1,11 @@
 import { compare } from "bcrypt";
 import { User } from "../models/user.model.js";
-import { cookieOptions, emitEvent, sendToken } from "../utils/features.js";
+import {
+  cookieOptions,
+  emitEvent,
+  sendToken,
+  uploadFilesToCloudinary,
+} from "../utils/features.js";
 import { TryCatch } from "../middlewares/error.js";
 import { ErrorHandler } from "../utils/apiError.js";
 import { Chat } from "../models/chat.model.js";
@@ -9,14 +14,16 @@ import { NEW_REQUEST, REFETCH_CHATS } from "../constants/events.js";
 import { getOtherMember } from "../utils/helper.js";
 
 // Create user and save to database and cookie
-const newUser = TryCatch(async (req, res,next) => {
-  const avatar = { public_id: "sdjbfsjbf", url: "ejbfeiwubfiuwebf" };
+const newUser = TryCatch(async (req, res, next) => {
+ 
   const { name, username, password, bio } = req.body;
-  
   const file = req.file;
-  
+  if (!file)
+    return next(new ErrorHandler("Please upload a valid avatar.", 401));
 
-  if(!file) return next(new ErrorHandler("Please upload a valid avatar.",401))
+  const result = await uploadFilesToCloudinary([file]);
+
+  const avatar = { public_id: result[0].public_id, url: result[0].url };
 
   const user = await User.create({
     name,
@@ -100,7 +107,7 @@ const sendFriendRequest = TryCatch(async (req, res, next) => {
   const { userId } = req.body;
   const request = await Request.findOne({
     $or: [
-      { sender: req.user, reciever: userId },
+      { sender: req.user, receiver: userId },
       { sender: userId, receiver: req.user },
     ],
   });

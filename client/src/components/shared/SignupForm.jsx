@@ -1,10 +1,11 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IoIosCamera } from "react-icons/io";
+import { server } from "../../constants/config";
 
 import {
   Card,
@@ -14,6 +15,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { userExists } from "@/redux/reducers/auth";
 
 const usernameRegex =
   /^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/;
@@ -33,13 +38,45 @@ function SignupForm({ toggleLogin }) {
       username: "",
       password: "",
       bio: "",
-      
     },
   });
-  const handleSubmitForm = (data) => {
-    console.log(data);
-    console.log('Selected file:', data.avatar);
+  const dispatch = useDispatch()
+
+  const handleSubmitForm = async (formData) => {
+    const formDataToSend = new FormData();
     
+  
+    // Append the form fields to the FormData object
+    for (const [key, value] of Object.entries(formData)) {
+      if (key === "avatar") {
+        // Handle the avatar file separately
+        if (value instanceof File) {
+          formDataToSend.append(key, value);
+        }
+      } else {
+        formDataToSend.append(key, value);
+      }
+    }
+  
+    const config = {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    console.log(formDataToSend)
+  
+    try {
+      const {data} = await axios.post(`${server}/api/user/register`, formDataToSend, config);
+      console.log(data.user)
+      dispatch(userExists(data.user))
+      toast.success(data.message);
+      
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Something went wrong.");
+      console.log(error);
+    }
   };
 
   const [previewImage, setPreviewImage] = useState(null);
@@ -50,14 +87,15 @@ function SignupForm({ toggleLogin }) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
-        setValue('avatar', file);
+        setValue("avatar", file);
       };
       reader.readAsDataURL(file);
     } else {
       setPreviewImage(null);
-      setValue('avatar', null);
+      setValue("avatar", null);
     }
   };
+
   return (
     <Card className="min-w-[23rem]">
       <CardHeader>
@@ -74,7 +112,6 @@ function SignupForm({ toggleLogin }) {
                 <AvatarImage src={previewImage} />
               ) : (
                 <>
-                  
                   <AvatarFallback>Select your Avatar.</AvatarFallback>
                 </>
               )}
@@ -159,7 +196,7 @@ function SignupForm({ toggleLogin }) {
             <span className="text-red-500">{errors.password.message}</span>
           )}
 
-          <Button  type="submit" className="bg-blue-600 hover:bg-blue-500">
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
             SignUp
           </Button>
           <h2 className="text-center text-md">OR</h2>

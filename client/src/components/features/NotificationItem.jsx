@@ -24,7 +24,7 @@ function NotificationItem({ sender, _id, handler }) {
         </Button>
         <Button
           variant="link"
-          onClick={() => handler({ _id, accept: true })}
+          onClick={() => handler({ _id, accept: false })}
           className="md:w-[4rem] md:h-[2rem] text-red-500 hover:text-red-600 hover:scale-125"
         >
           Reject
