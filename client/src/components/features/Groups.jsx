@@ -9,6 +9,9 @@ import { MdEdit, MdDone, MdAdd } from "react-icons/md";
 import { Input } from "../ui/input";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import UserCard from "../shared/UserCard";
+import { useMyGroupsQuery } from "@/redux/api/api";
+import { useErrors } from "@/hooks/hook";
+import { LayoutLoader } from "../layout/Loaders";
 
 function Groups() {
   const chatId = useSearchParams()[0].get("group");
@@ -17,7 +20,12 @@ function Groups() {
   const [groupName, setGroupName] = useState("");
   const inputRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
-  console.log(chatId);
+  const myGroups = useMyGroupsQuery();
+  console.log(myGroups);
+
+  const errors = [{ isError: myGroups.isError, error: myGroups.error }];
+  useErrors(errors);
+
   const onGroupSelectHandler = (name) => {
     setIsGroupOpen(true);
     setGroupName((prev) => name);
@@ -28,12 +36,12 @@ function Groups() {
     console.log("Deleted");
   };
 
-  const openAddMemberHandler = () => { };
-  
+  const openAddMemberHandler = () => {};
+
   const removeMemberHandler = (id) => {
-    console.log(id)
-  }
-  return (
+    console.log(id);
+  };
+  return myGroups.isLoading ? <LayoutLoader /> : (
     <div className="grid grid-cols-3">
       <div
         className={`flex flex-col md:col-span-1 col-span-3  ${
@@ -43,7 +51,7 @@ function Groups() {
         <h1>My Groups</h1>
         <div>
           <GroupList
-            myGroups={dummyChats}
+            myGroups={myGroups?.data?.groups}
             chatId={chatId}
             handler={onGroupSelectHandler}
           />

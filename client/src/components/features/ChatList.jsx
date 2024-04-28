@@ -14,6 +14,7 @@ function ChatList({
   ],
   handleDeleteChat,
 }) {
+ 
   return (
     <div className={`w-${width} flex flex-col overflow-y-auto `}>
       {chats?.map((data, index) => {

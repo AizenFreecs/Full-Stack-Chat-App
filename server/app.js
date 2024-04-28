@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import chatRoutes from "./routes/chat.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import { createServer } from "http";
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "./constants/events.js";
+import { NEW_MESSAGE, NEW_MESSAGE_ALERT, START_TYPING, STOP_TYPING } from "./constants/events.js";
 import { v4 as uuid } from "uuid";
 import { getSockets } from "./utils/helper.js";
 import { Message } from "./models/message.model.js";
@@ -35,6 +35,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: corsOptions,
 });
+app.set("io",io)
 const userSocketIds = new Map();
 
 
@@ -66,6 +67,7 @@ io.on("connection", (socket) => {
 
   console.log("A user connected", userSocketIds);
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
+    console.log(message)
     const messageForRealTime = {
       content: message,
       _id: uuid(),
@@ -99,6 +101,17 @@ io.on("connection", (socket) => {
       console.log(error);
     }
   });
+
+  socket.on(START_TYPING, ({ members, chatId }) => {
+    const membersSockets = getSockets(members);
+    socket.to(membersSockets).emit(START_TYPING, { chatId });
+  })
+
+  socket.on(STOP_TYPING, ({ members, chatId }) => {
+    const membersSockets = getSockets(members);
+    
+    socket.to(membersSockets).emit(STOP_TYPING, { chatId });
+  })
 
   socket.on("disconnect", () => {
     console.log("User disconnected", socket.id);

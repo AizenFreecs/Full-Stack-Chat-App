@@ -1,6 +1,7 @@
 import {
   ALERT,
   NEW_ATTACHEMENT,
+  NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
   REFETCH_CHATS,
 } from "../constants/events.js";
@@ -9,7 +10,11 @@ import { Chat } from "../models/chat.model.js";
 import { Message } from "../models/message.model.js";
 import { User } from "../models/user.model.js";
 import { ErrorHandler } from "../utils/apiError.js";
-import { deleteCloudinaryFiles, emitEvent } from "../utils/features.js";
+import {
+  deleteCloudinaryFiles,
+  emitEvent,
+  uploadFilesToCloudinary,
+} from "../utils/features.js";
 import { getOtherMember } from "../utils/helper.js";
 
 const getMyChats = TryCatch(async (req, res, next) => {
@@ -21,7 +26,7 @@ const getMyChats = TryCatch(async (req, res, next) => {
   const transformedChats = chats.map(
     ({ _id, name, groupChat, members = [], lastMessage, avatar }) => {
       const otherMember = getOtherMember(members, req.user);
-      
+
       return {
         _id,
         groupChat,
@@ -40,7 +45,7 @@ const getMyChats = TryCatch(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    chats:transformedChats,
+    chats: transformedChats,
   });
 });
 
@@ -86,7 +91,7 @@ const getMyGroups = TryCatch(async (req, res, next) => {
   });
   res.status(200).json({
     success: true,
-    message: myGroups,
+    groups:myGroups,
   });
 });
 
@@ -212,6 +217,7 @@ const leaveGroup = TryCatch(async (req, res, next) => {
 const sendAttachements = TryCatch(async (req, res, next) => {
   const { chatId } = req.body;
   const files = req.files || [];
+  console.log(files);
 
   if (files.length < 1)
     return next(new ErrorHandler("Please upload attachements", 404));
@@ -223,7 +229,7 @@ const sendAttachements = TryCatch(async (req, res, next) => {
     User.findById(req.user, "name"),
   ]);
 
-  const attachements = [];
+  const attachements = await uploadFilesToCloudinary(files);
 
   if (!chat) return next(new ErrorHandler("Chat not found", 404));
 
@@ -246,7 +252,7 @@ const sendAttachements = TryCatch(async (req, res, next) => {
 
   const msg = await Message.create(msgForDb);
 
-  emitEvent(req, NEW_ATTACHEMENT, chat.members, {
+  emitEvent(req, NEW_MESSAGE, chat.members, {
     message: msgForRealTime,
     chatId,
   });

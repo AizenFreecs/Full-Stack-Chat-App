@@ -16,14 +16,19 @@ import ProfileCard from "../shared/ProfileCard";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Skeleton } from "../ui/skeleton";
 import ChatList from "../features/ChatList";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { resetNotificationCount } from "@/redux/reducers/chat";
 
 function Header() {
   const [isNotifications, setNotifications] = useState(false);
+  const dispatch = useDispatch() 
   const params = useParams();
   const chatId = params.chatId;
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
-  const {user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
+  const { notificationCount } = useSelector((state) => state.chat);
+
+  
 
   const {} = useSelector((state) => state.misc);
 
@@ -32,6 +37,7 @@ function Header() {
   };
   const handleNotifications = () => {
     setNotifications(true);
+    dispatch(resetNotificationCount())
   };
 
   const handleDeleteChat = (e, _id, groupChat) => {
@@ -124,12 +130,17 @@ function Header() {
 
           <Popover>
             <PopoverTrigger>
-              <div className=" hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="relative hover:bg-orange-500 rounded-full p-2 cursor-pointer">
                 <FaBell
                   className="h-[1.5rem] w-[1.5rem]"
                   title="Notifications"
                   onClick={handleNotifications}
                 />
+                {notificationCount > 0 && (
+                    <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-1 text-xs">
+                      {notificationCount}
+                    </span>
+                  )}
               </div>
             </PopoverTrigger>
             <PopoverContent className="mr-4 md:w-[500px] w-[90vw]">
@@ -139,12 +150,13 @@ function Header() {
 
           <Drawer direction="right" className="outline-none  ">
             <DrawerTrigger asChild>
-              <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="relative hover:bg-orange-500 rounded-full p-2 cursor-pointer">
                 <h1>
                   <CgProfile
                     className="h-[1.5rem] w-[1.5rem]"
                     title="Profile"
                   />
+                  
                 </h1>
               </div>
             </DrawerTrigger>

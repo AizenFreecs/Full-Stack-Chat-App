@@ -30,7 +30,7 @@ const GroupListItems = memo(({ group, chatId, handler }) => {
     >
       <div className="flex my-2 items-center gap-4" >
         <Avatar>
-          <AvatarImage src={transformImage(avatar)} />
+          <AvatarImage src={transformImage(avatar.url)} />
           <AvatarFallback>NF</AvatarFallback>
         </Avatar>
         <h1>{name}</h1>

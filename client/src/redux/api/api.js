@@ -6,7 +6,7 @@ const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${server}/api`,
   }),
-  tagTypes: ["Chat", "User"],
+  tagTypes: ["Chat", "User", "Message"],
 
   endpoints: (builder) => ({
     myChats: builder.query({
@@ -50,7 +50,7 @@ const api = createApi({
     }),
 
     chatDetails: builder.query({
-      query: ({chatId, populate = false}) => {
+      query: ({ chatId, populate = false }) => {
         let url = `/chat/${chatId}`;
         if (populate) url += "?populate=true";
         return {
@@ -60,6 +60,50 @@ const api = createApi({
       },
       providesTags: ["Chat"],
     }),
+
+    getOldMessages: builder.query({
+      query: ({ chatId, page }) => ({
+        url: `/chat/message/${chatId}?page=${page}`,
+        credentials: "include",
+      }),
+      keepUnusedDataFor: 0,
+    }),
+
+    sendAttachements: builder.mutation({
+      query: (data) => ({
+        url: "/chat/message",
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+    }),
+
+    myGroups: builder.query({
+      query: () => ({ url: "/chat/mygroups", credentials: "include" }),
+      providesTags: ["Chat"],
+    }),
+
+    availableFriends: builder.query({
+      query: (chatId) => {
+        let url = `/user/friends`
+        if(chatId) url += `?chatId=${chatId}`
+        return {
+          url,
+          credentials: "include",
+        };
+      },
+      providesTags: ["Chat"],
+    }),
+
+    newGroup: builder.mutation({
+      query: ({name,members}) => ({
+        url: "/chat/newgroup",
+        method: "POST",
+        body: {name,members},
+        credentials: "include",
+      }),
+      invalidatesTags: ["Chat"],
+    })
   }),
 });
 
@@ -70,5 +114,10 @@ export const {
   useSendFriendRequestMutation,
   useGetNotificationsQuery,
   useAcceptFriendRequestMutation,
-  useChatDetailsQuery
+  useChatDetailsQuery,
+  useGetOldMessagesQuery,
+  useSendAttachementsMutation,
+  useMyGroupsQuery,
+  useAvailableFriendsQuery,
+  useNewGroupMutation
 } = api;

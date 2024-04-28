@@ -25,8 +25,9 @@ function Notifications() {
         toast.success(res.data.message || "Friend request accepted");
         navigate(`/chat/${res.data.senderId}`);
       } else {
-        toast.error("Something went wrong");
+        toast.error("Friend Request Rejected");
         console.log(error);
+        navigate('/')
       }
     } catch (error) {}
   };

@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import { transformImage } from "@/lib/features";
 
 function ChatItem({
   avatar = [],
@@ -26,7 +27,7 @@ function ChatItem({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-4 p-1 bg-slate-500 rounded-full">
             <Avatar>
-              <AvatarImage src={avatar} />
+              <AvatarImage src={transformImage(avatar)} />
             </Avatar>
           </div>
           <div className="flex flex-col">

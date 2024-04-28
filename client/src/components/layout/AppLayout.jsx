@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import Header from "./Header";
 import ChatList from "../features/ChatList";
 import ChatItem from "../shared/ChatItem";
@@ -6,26 +6,52 @@ import { dummyChats } from "@/constants/dummyData";
 import { useParams } from "react-router-dom";
 import { useMyChatsQuery } from "@/redux/api/api";
 import { Skeleton } from "../ui/skeleton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useErrors } from "@/hooks/hook";
 import { getSocket } from "../../../Socket";
+import { useSocketEvents } from "@/hooks/hook";
+import {
+  incrementNotification,
+  setNewMessagesAlert,
+} from "@/redux/reducers/chat";
+import { NEW_MESSAGE_ALERT, NEW_REQUEST } from "@/constants/events";
+import { getOrSaveFromStorage } from "@/lib/features";
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
     const chatId = params.chatId;
-    const socket = getSocket()
-   
+    const socket = getSocket();
+    const dispatch = useDispatch();
     const { uploadingLoader } = useSelector((state) => state.misc);
+    const { newMessagesAlert } = useSelector((state) => state.chat);
     
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
-    
 
-    useErrors([{isError, error}])
+    useErrors([{ isError, error }]);
+
+    useEffect(() => {
+      getOrSaveFromStorage({key:NEW_MESSAGE_ALERT,value:newMessagesAlert})
+    }, [newMessagesAlert]);
 
     const handleDeleteChat = (e, _id, groupChat) => {
       e.preventDefault();
       console.log("Chat Deleted", _id, groupChat);
     };
+
+    const newMessageAlertHandler = useCallback((data) => {
+      if(data.chatId === chatId) return
+      dispatch(setNewMessagesAlert(data));
+    }, [chatId]);
+
+    const newRequestHandler = useCallback(() => {
+      dispatch(incrementNotification());
+    }, [dispatch]);
+
+    const eventHandlers = {
+      [NEW_MESSAGE_ALERT]: newMessageAlertHandler,
+      [NEW_REQUEST]: newRequestHandler,
+    };
+    useSocketEvents(socket, eventHandlers);
     return (
       <div>
         <Header />
@@ -37,12 +63,7 @@ const AppLayout = () => (WrappedComponent) => {
               <ChatList
                 chats={data.chats}
                 chatId={chatId}
-                newMessagesAlert={[
-                  {
-                    chatId,
-                    count: 4,
-                  },
-                ]}
+                newMessagesAlert={newMessagesAlert}
                 handleDeleteChat={handleDeleteChat}
               />
             )}

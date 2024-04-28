@@ -24,4 +24,14 @@ const LayoutLoader = () => {
   );
 };
 
-export { LayoutLoader };
+const TypingLoader = () => {
+  return (
+    <div id="typing-indicator" className=" flex items-center justify-center">
+      <div className="typing-dot dot1 bg-green-500 h-2 w-2 rounded-full mx-1 animate-bounce"></div>
+      <div className="typing-dot dot2 bg-green-500 h-2 w-2 rounded-full mx-1 animate-bounce animation-delay-200"></div>
+      <div className="typing-dot dot3 bg-green-500 h-2 w-2 rounded-full mx-1 animate-bounce animation-delay-400"></div>
+    </div>
+  );
+};
+
+export { LayoutLoader, TypingLoader };

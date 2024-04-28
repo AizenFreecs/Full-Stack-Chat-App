@@ -5,7 +5,7 @@ const getOtherMember = (members, userID) => {
 }
 
 const getSockets = (users) => {
-  return users.map((user)=>userSocketIds.get(user._id.toString()))
+  return users.map((user)=>userSocketIds.get(user.toString()))
 }
 
 const getBase64 = (file) => `data:${file.mimetype};base64,${file.buffer.toString("base64")}`
