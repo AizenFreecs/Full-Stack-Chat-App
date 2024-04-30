@@ -27,6 +27,7 @@ function Header() {
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
   const { user } = useSelector((state) => state.auth);
   const { notificationCount } = useSelector((state) => state.chat);
+  const [isNewGroup,setIsNewGroup] = useState(false)
 
   
 
@@ -100,7 +101,7 @@ function Header() {
             </DialogContent>
           </Dialog>
 
-          <Dialog>
+          <Dialog open={isNewGroup} onOpenChange={setIsNewGroup}>
             <DialogTrigger>
               <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
                 <CiCirclePlus
@@ -110,7 +111,7 @@ function Header() {
               </div>
             </DialogTrigger>
             <DialogContent className="md:w-[500px] w-[85vw] rounded-lg">
-              <NewGroups />
+              <NewGroups openCloseHandler={setIsNewGroup} />
             </DialogContent>
           </Dialog>
 

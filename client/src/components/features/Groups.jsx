@@ -1,30 +1,73 @@
+import { useAsyncMutation, useErrors } from "@/hooks/hook";
+import {
+  useAddGroupMembersMutation,
+  useAvailableFriendsQuery,
+  useChatDetailsQuery,
+  useDeleteChatMutation,
+  useMyGroupsQuery,
+  useRemoveGroupMemberMutation,
+  useRenameGroupMutation,
+} from "@/redux/api/api";
 import { Separator } from "@radix-ui/react-separator";
-import React, { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { Button } from "../ui/button";
-import { dummyChats, dummyUsers } from "@/constants/dummyData";
-import GroupList from "./GroupList";
-import { useSearchParams } from "react-router-dom";
-import { MdEdit, MdDone, MdAdd } from "react-icons/md";
-import { Input } from "../ui/input";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import UserCard from "../shared/UserCard";
-import { useMyGroupsQuery } from "@/redux/api/api";
-import { useErrors } from "@/hooks/hook";
+import { MdAdd, MdDone, MdEdit } from "react-icons/md";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { LayoutLoader } from "../layout/Loaders";
+import UserCard from "../shared/UserCard";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Skeleton } from "../ui/skeleton";
+import GroupList from "./GroupList";
+import toast from "react-hot-toast";
 
 function Groups() {
   const chatId = useSearchParams()[0].get("group");
   const [isGroupOpen, setIsGroupOpen] = useState(false);
+  const [isConfirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [isEditGroupName, setIsEditGroupName] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [newGroupName, setNewGroupName] = useState("");
+  const navigate = useNavigate();
   const inputRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const myGroups = useMyGroupsQuery();
-  console.log(myGroups);
+  const groupDetails = useChatDetailsQuery(
+    { chatId, populate: true },
+    { skip: !chatId }
+  );
+  const [members, setMembers] = useState([]);
+  const [renameGroup, isLoadingGroupName] = useAsyncMutation(
+    useRenameGroupMutation
+  );
+  const [removeGroupMember, isLoadingRemoveMember] = useAsyncMutation(
+    useRemoveGroupMemberMutation
+  );
 
-  const errors = [{ isError: myGroups.isError, error: myGroups.error }];
+  const [deleteGroup, isLoadingDeleteGroup] = useAsyncMutation(
+    useDeleteChatMutation
+  );
+
+  console.log(groupDetails.data);
+
+  const errors = [
+    { isError: myGroups.isError, error: myGroups.error },
+    { isError: groupDetails.isError, error: groupDetails.error },
+  ];
   useErrors(errors);
+
+  useEffect(() => {
+    if (groupDetails.data) {
+      setGroupName(groupDetails.data.chat.name);
+      setMembers(groupDetails.data.chat.members);
+    }
+    return () => {
+      setMembers([]);
+      setGroupName("");
+      setIsEditGroupName(false);
+    };
+  }, [groupDetails.data]);
 
   const onGroupSelectHandler = (name) => {
     setIsGroupOpen(true);
@@ -32,16 +75,26 @@ function Groups() {
     console.log(groupName);
   };
 
-  const confirmDeleteHandler = () => {
-    console.log("Deleted");
+  const updateGroupNameHandler = () => {
+    setIsEditGroupName(false);
+    renameGroup("Updating the group name . . .", {
+      chatId,
+      name: newGroupName,
+    });
   };
 
-  const openAddMemberHandler = () => {};
+  const confirmDeleteHandler = () => {
+    deleteGroup("Deleting the group . . . ", chatId);
+    navigate("/");
+    toast.success("Group Deleted successfully");
+  };
 
   const removeMemberHandler = (id) => {
-    console.log(id);
+    removeGroupMember("Removing members . . . ", { chatId, userId: id });
   };
-  return myGroups.isLoading ? <LayoutLoader /> : (
+  return myGroups.isLoading ? (
+    <LayoutLoader />
+  ) : (
     <div className="grid grid-cols-3">
       <div
         className={`flex flex-col md:col-span-1 col-span-3  ${
@@ -70,13 +123,16 @@ function Groups() {
           <div className="p-1 flex items-center gap-2">
             {isEditGroupName ? (
               <div className="flex items-center gap-2">
-                <Input placeholder="Enter group name" ref={inputRef} />
+                <Input
+                  placeholder="Enter group name"
+                  ref={inputRef}
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                />
                 <MdDone
                   className="cursor-pointer h-[1.5rem] w-[1.5rem]"
-                  onClick={() => {
-                    setGroupName(inputRef.current.value);
-                    setIsEditGroupName(false);
-                  }}
+                  onClick={updateGroupNameHandler}
+                  disabled={isLoadingGroupName}
                 />
               </div>
             ) : (
@@ -94,28 +150,38 @@ function Groups() {
         <div className="flex flex-col items-center gap-4">
           <h1>Members</h1>
           <div className="max-h-[35vh] md:max-h-[47vh] overflow-y-auto">
-            {dummyUsers.map((item) => (
-              <UserCard
-                _id={item._id}
-                key={item._id}
-                name={item.name}
-                avatar={item.avatar}
-                isAdded
-                handler={removeMemberHandler}
-                className=" border rounded-lg mb-2 border-black"
-              />
-            ))}
+            {isLoadingRemoveMember ? (
+              <Skeleton />
+            ) : (
+              members.map((item) => (
+                <UserCard
+                  _id={item._id}
+                  key={item._id}
+                  name={item.name}
+                  avatar={item.avatar}
+                  isAdded
+                  handler={removeMemberHandler}
+                  className=" border rounded-lg mb-2 border-black"
+                />
+              ))
+            )}
           </div>
         </div>
         <div className="flex items-center justify-around mt-5">
-          <Dialog>
+          <Dialog
+            open={isConfirmDeleteOpen}
+            onOpenChange={setConfirmDeleteOpen}
+          >
             <DialogTrigger>
               <div className="p-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-500">
-                <h1>Confirm Delete</h1>
+                <h1>Delete Group</h1>
               </div>
             </DialogTrigger>
             <DialogContent className="w-[85vw] rounded-lg">
-              <ConfirmDelete />
+              <ConfirmDelete
+                confirmDeleteHandler={confirmDeleteHandler}
+                openCloseHandler={setConfirmDeleteOpen}
+              />
             </DialogContent>
           </Dialog>
 
@@ -127,7 +193,7 @@ function Groups() {
               </div>
             </DialogTrigger>
             <DialogContent className="md:w-[400px] w-[80vw] ">
-              <AddMembers openCloseHandler={setIsOpen} />
+              <AddMembers openCloseHandler={setIsOpen} chatId={chatId} />
             </DialogContent>
           </Dialog>
         </div>
@@ -136,11 +202,9 @@ function Groups() {
   );
 }
 
-const ConfirmDelete = () => {
-  const handleConfirmDeleteHandler = () => {
-    console.log("Group Deleted");
-  };
+const ConfirmDelete = ({ confirmDeleteHandler, openCloseHandler }) => {
   const handleRejectDeleteHandler = () => {
+    openCloseHandler(false);
     console.log("Delete Cancelled");
   };
   return (
@@ -150,7 +214,7 @@ const ConfirmDelete = () => {
         <Button
           variant="link"
           className=" text-red-500 text-lg"
-          onClick={handleConfirmDeleteHandler}
+          onClick={confirmDeleteHandler}
         >
           Yes
         </Button>
@@ -166,14 +230,13 @@ const ConfirmDelete = () => {
   );
 };
 
-const AddMembers = ({
-  addMember,
-  isLoadingAddMember,
-  chatId = "temp",
-  openCloseHandler,
-}) => {
-  const [users, setUsers] = useState(dummyUsers);
+const AddMembers = ({ chatId = "temp", openCloseHandler }) => {
   const [selectedMembers, setSelectedMembers] = useState([]);
+  const [addGroupMember, isLoadingAddMember] = useAsyncMutation(
+    useAddGroupMembersMutation
+  );
+
+  const { isLoading, data, isError, error } = useAvailableFriendsQuery(chatId);
 
   const selectMembersHandler = (id) => {
     setSelectedMembers((prev) =>
@@ -183,15 +246,22 @@ const AddMembers = ({
   console.log(selectedMembers);
 
   const confirmAddFriendHandler = () => {
-    console.log("Group Updated");
+    addGroupMember("Group Updated", {
+      chatId,
+      members: selectedMembers,
+    });
     openCloseHandler(false);
   };
+
+  useErrors([{ isError, error }]);
   return (
     <div className="flex flex-col item-center ">
       <h1 className="text-center text-xl mb-4">Add Members</h1>
       <div className=" max-h-[50vh] overflow-y-auto">
-        {users.length > 0 ? (
-          users.map((item) => (
+        {isLoading ? (
+          <Skeleton />
+        ) : data?.friends?.length > 0 ? (
+          data?.friends?.map((item) => (
             <UserCard
               _id={item._id}
               key={item._id}

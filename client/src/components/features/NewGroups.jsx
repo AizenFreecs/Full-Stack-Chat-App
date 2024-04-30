@@ -6,13 +6,14 @@ import { Button } from "../ui/button";
 import { useAvailableFriendsQuery, useNewGroupMutation } from "@/redux/api/api";
 import { useAsyncMutation, useErrors } from "@/hooks/hook";
 import { Skeleton } from "../ui/skeleton";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-function NewGroups() {
+function NewGroups(openCloseHandler) {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [groupName, setGroupName] = useState("");
   const { isError, isLoading, error, data } = useAvailableFriendsQuery();
   const [NewGroup,isLoadingNewGroup] = useAsyncMutation(useNewGroupMutation)
-  
+  const navigate = useNavigate()
   const errors = [
     {
       isError,
@@ -36,7 +37,9 @@ function NewGroups() {
       return toast.error("Please select atleast 3 members");
     }
     console.log(groupName, selectedMembers);
-    NewGroup("Creating new group ...",{name:groupName,members:selectedMembers})
+    NewGroup("Creating new group ...", { name: groupName, members: selectedMembers })
+    navigate("/");
+    openCloseHandler(false);
   };
 
   return (

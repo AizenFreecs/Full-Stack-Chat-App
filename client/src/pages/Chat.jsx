@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useInfiniteScrollTop } from "6pp";
 import { removeNewMessagesAlert } from "@/redux/reducers/chat";
 import { TypingLoader } from "@/components/layout/Loaders";
+import { useNavigate } from "react-router-dom";
 
 function Chat({ chatId }) {
   const socket = getSocket();
@@ -23,6 +24,7 @@ function Chat({ chatId }) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const bottomRef = useRef(null);
+  const navigate = useNavigate()
 
   const [IamTyping, setIamTyping] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
@@ -62,10 +64,15 @@ function Chat({ chatId }) {
     };
   }, [chatId]);
 
+
+
   useEffect(() => {
     if(bottomRef.current) bottomRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages])
   
+  useEffect(() => {
+    if(!chatDetails.data?.chat) return navigate("/")
+  },[chatDetails.data])
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -106,8 +113,9 @@ function Chat({ chatId }) {
 
   const alertListener = useCallback(
     (data) => {
+      if (data.chatId !== chatId) return
       const messageForAlert = {
-        content,
+        content:data.message,
         sender: {
           _id: "YehhaiekrandomID",
           name:"Admin"
