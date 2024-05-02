@@ -1,22 +1,30 @@
+import { useInfiniteScrollTop } from "6pp";
 import FileMenu from "@/components/features/FileMenu";
 import AppLayout from "@/components/layout/AppLayout";
+import { TypingLoader } from "@/components/layout/Loaders";
 import MessageComponent from "@/components/shared/MessageComponent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { dummyMessage } from "@/constants/dummyData";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { IoSend } from "react-icons/io5";
-import { getSocket } from "../../Socket";
-import { ALERT, NEW_MESSAGE, START_TYPING, STOP_TYPING } from "@/constants/events";
-import { useChatDetailsQuery, useGetOldMessagesQuery } from "@/redux/api/api";
+import {
+  ALERT,
+  CHAT_JOINED,
+  CHAT_LEFT,
+  NEW_MESSAGE,
+  START_TYPING,
+  STOP_TYPING,
+} from "@/constants/events";
 import { useErrors, useSocketEvents } from "@/hooks/hook";
-import { useDispatch, useSelector } from "react-redux";
-import { useInfiniteScrollTop } from "6pp";
+import { useChatDetailsQuery, useGetOldMessagesQuery } from "@/redux/api/api";
 import { removeNewMessagesAlert } from "@/redux/reducers/chat";
-import { TypingLoader } from "@/components/layout/Loaders";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect,  useRef, useState } from "react";
+import { IoSend } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate,useParams } from "react-router-dom";
+import { getSocket } from "../../Socket";
 
-function Chat({ chatId }) {
+function Chat() {
+  const params = useParams()
+  const chatId = params.chatId
   const socket = getSocket();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -24,12 +32,14 @@ function Chat({ chatId }) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const bottomRef = useRef(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const containerRef = useRef(null);
+
+
 
   const [IamTyping, setIamTyping] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
   const typingTimeout = useRef(null);
-  
 
   const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
   const oldMessagesChunk = useGetOldMessagesQuery({ chatId, page });
@@ -37,23 +47,35 @@ function Chat({ chatId }) {
     { isError: chatDetails.isError, error: chatDetails.error },
     { isError: oldMessagesChunk.isError, error: oldMessagesChunk.error },
   ];
+  
   const members = chatDetails.data?.chat?.members;
+
+  const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
+    containerRef,
+    oldMessagesChunk.data?.totalPages,
+    page,
+    setPage,
+    oldMessagesChunk.data?.messages
+  );
+
 
   const messageOnChangeHandler = (e) => {
     setMessage(e.target.value);
 
     if (!IamTyping) {
       socket.emit(START_TYPING, { members, chatId });
-      setIamTyping(true)
+      setIamTyping(true);
     }
-    if(typingTimeout.current) clearTimeout(typingTimeout.current)
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => {
-      socket.emit(STOP_TYPING, { members, chatId })
-      setIamTyping(false)
-    },[2000])
+      socket.emit(STOP_TYPING, { members, chatId });
+      setIamTyping(false);
+    }, [2000]);
   };
 
   useEffect(() => {
+    
+    socket.emit(CHAT_JOINED, { userId: user._id, members });
     dispatch(removeNewMessagesAlert(chatId));
 
     return () => {
@@ -61,18 +83,18 @@ function Chat({ chatId }) {
       setMessage("");
       setOldMessages([]);
       setPage(1);
+      socket.emit(CHAT_LEFT, { userId: user._id, members });
     };
   }, [chatId]);
 
-
+  useEffect(() => {
+    if (bottomRef.current)
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
-    if(bottomRef.current) bottomRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [messages])
-  
-  useEffect(() => {
-    if(!chatDetails.data?.chat) return navigate("/")
-  },[chatDetails.data])
+    if (chatDetails.isError) return navigate("/");
+  }, [chatDetails.isError]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -113,50 +135,34 @@ function Chat({ chatId }) {
 
   const alertListener = useCallback(
     (data) => {
-      if (data.chatId !== chatId) return
+      if (data.chatId !== chatId) return;
       const messageForAlert = {
-        content:data.message,
+        content: data.message,
         sender: {
           _id: "YehhaiekrandomID",
-          name:"Admin"
+          name: "Admin",
         },
         chat: chatId,
         createdAt: new Date().toISOString(),
-      }
+      };
 
-      setMessages((prev) => [...prev, messageForAlert])
+      setMessages((prev) => [...prev, messageForAlert]);
     },
     [chatId]
   );
-
-
 
   const eventHandlers = {
     [NEW_MESSAGE]: newMessageListener,
     [START_TYPING]: startTypingListener,
     [STOP_TYPING]: stopTypingListener,
-    [ALERT]:alertListener
+    [ALERT]: alertListener,
   };
 
   useSocketEvents(socket, eventHandlers);
 
-  const containerRef = useRef(null);
-
-  const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
-    containerRef,
-    oldMessagesChunk.data?.totalPages,
-    page,
-    setPage,
-    oldMessagesChunk.data?.messages
-  );
-
   useErrors(errors);
   const allMessages = [...oldMessages, ...messages];
-  return chatDetails.isLoading ? (
-    <>
-      <h1>Loading</h1>
-    </>
-  ) : (
+  return  (
     <main className="w-full h-full max-h-[calc(100vh-4rem)] bg-white ">
       <div
         ref={containerRef}
@@ -165,11 +171,9 @@ function Chat({ chatId }) {
         {allMessages.map((item) => (
           <MessageComponent message={item} user={user} key={item._id} />
         ))}
-          
-          {
-            userTyping && <TypingLoader />
-          }
-          <div ref={bottomRef} />
+
+        {userTyping && <TypingLoader />}
+        <div ref={bottomRef} />
       </div>
       <form
         className="h-[10%] w-full flex items-center p-2 px-4 gap-4"

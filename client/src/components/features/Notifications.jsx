@@ -5,32 +5,28 @@ import {
   useAcceptFriendRequestMutation,
   useGetNotificationsQuery,
 } from "@/redux/api/api";
-import { useErrors } from "@/hooks/hook";
+import { useAsyncMutation, useErrors } from "@/hooks/hook";
 import { Skeleton } from "../ui/skeleton";
 import { Separator } from "../ui/separator";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { setIsOpenNotifications } from "@/redux/reducers/misc";
 function Notifications() {
   const navigate = useNavigate();
   const { isloading, data, error, isError } = useGetNotificationsQuery();
 
   console.log(data);
-  const [acceptRequest] = useAcceptFriendRequestMutation();
+  const [acceptRequest] = useAsyncMutation(useAcceptFriendRequestMutation);
   const friendRequestHandler = async ({ _id, accept }) => {
-    try {
-      const res = await acceptRequest({ requestId: _id, accept });
-      console.log(res);
-      if (res.data?.success) {
-        console.log(res.data.message);
-        toast.success(res.data.message || "Friend request accepted");
-        navigate(`/chat/${res.data.senderId}`);
-      } else {
-        toast.error("Friend Request Rejected");
-        console.log(error);
-        navigate('/')
-      }
-    } catch (error) {}
+    await acceptRequest("Accepting friend request . . .", {
+      requestId: _id,
+      accept,
+    });
+    navigate("/");
   };
+
+  
+  
   useErrors([{ isError, error }]);
   return (
     <section className="flex flex-col items-center gap-2">

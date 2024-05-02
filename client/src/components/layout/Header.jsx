@@ -18,18 +18,17 @@ import { Skeleton } from "../ui/skeleton";
 import ChatList from "../features/ChatList";
 import { useDispatch, useSelector } from "react-redux";
 import { resetNotificationCount } from "@/redux/reducers/chat";
+import { setIsOpenNotifications } from "@/redux/reducers/misc";
 
-function Header() {
-  const [isNotifications, setNotifications] = useState(false);
-  const dispatch = useDispatch() 
+function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
+  const dispatch = useDispatch();
   const params = useParams();
   const chatId = params.chatId;
   const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
   const { user } = useSelector((state) => state.auth);
   const { notificationCount } = useSelector((state) => state.chat);
-  const [isNewGroup,setIsNewGroup] = useState(false)
-
-  
+  const [isNewGroup, setIsNewGroup] = useState(false);
+  const { isOpenNotifications } = useSelector((state) => state.misc);
 
   const {} = useSelector((state) => state.misc);
 
@@ -37,13 +36,12 @@ function Header() {
     console.log("Search function");
   };
   const handleNotifications = () => {
-    setNotifications(true);
-    dispatch(resetNotificationCount())
+    /* dispatch(setIsOpenNotifications(true)); */
+    dispatch(resetNotificationCount());
   };
 
-  const handleDeleteChat = (e, _id, groupChat) => {
-    e.preventDefault();
-    console.log("Chat Deleted", _id, groupChat);
+  const closeHandler = () => {
+    dispatch(setIsOpenNotifications(false));
   };
 
   return (
@@ -53,9 +51,10 @@ function Header() {
           <span className="items-center pt-3 hidden md:block">
             Aizen's Chat
           </span>
+
           <Drawer>
             <DrawerTrigger>
-              <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="hover:bg-orange-500 rounded-full md:hidden p-2 cursor-pointer">
                 <CiMenuBurger
                   className="h-[1.5rem] w-[1.5rem]"
                   onClick={handleNotifications}
@@ -70,13 +69,9 @@ function Header() {
                 <ChatList
                   chats={data.chats}
                   chatId={chatId}
-                  newMessagesAlert={[
-                    {
-                      chatId,
-                      count: 4,
-                    },
-                  ]}
+                  newMessagesAlert={newMessagesAlert}
                   handleDeleteChat={handleDeleteChat}
+                  onlineUsers={onlineUsers}
                 />
               )}
             </DrawerContent>
@@ -138,10 +133,10 @@ function Header() {
                   onClick={handleNotifications}
                 />
                 {notificationCount > 0 && (
-                    <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-1 text-xs">
-                      {notificationCount}
-                    </span>
-                  )}
+                  <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-1 text-xs">
+                    {notificationCount}
+                  </span>
+                )}
               </div>
             </PopoverTrigger>
             <PopoverContent className="mr-4 md:w-[500px] w-[90vw]">
@@ -157,7 +152,6 @@ function Header() {
                     className="h-[1.5rem] w-[1.5rem]"
                     title="Profile"
                   />
-                  
                 </h1>
               </div>
             </DrawerTrigger>

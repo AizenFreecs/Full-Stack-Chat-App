@@ -10,16 +10,7 @@ const chatSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    avatar: {
-      public_id: {
-        type: String,
-        
-    },
-    url: {
-        type: String,
-        
-    }
-    },
+    avatar: [{type:String}],
     creator: {
       type: Types.ObjectId,
       ref: "User",

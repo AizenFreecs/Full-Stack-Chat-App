@@ -31,7 +31,7 @@ const getMyChats = TryCatch(async (req, res, next) => {
         _id,
         groupChat,
         name: groupChat ? name : otherMember.name,
-        avatar: groupChat ? avatar.url : otherMember.avatar.url,
+        avatar: groupChat ? avatar : otherMember.avatar.url,
 
         members: members.reduce((prev, curr) => {
           if (curr._id.toString() !== req.user.toString()) {
@@ -51,21 +51,31 @@ const getMyChats = TryCatch(async (req, res, next) => {
 
 const newGroupChat = TryCatch(async (req, res, next) => {
   const { name, members } = req.body;
-  const avatar = { public_id: "sdjbfsjbf", url: "ejbfeiwubfiuwebf" };
+
+  /* if (!file)
+    return next(new ErrorHandler("Please upload a valid group avatar.")); */
+  const avatar = ["ehvfhwevfhwef", "hjefwevfhgevf"];
   if (members.length < 2)
     return next(new ErrorHandler("Group must have at least 3 members.", 400));
 
   const allMembers = [...members, req.user];
+
+  const avatars = [];
+
+  for (let i = 0; i < 3; i++) {
+    const user = await User.findById(allMembers[i])
+    avatars.push(user?.avatar?.url)
+  }
 
   await Chat.create({
     name,
     groupChat: true,
     creator: req.user,
     members: allMembers,
-    avatar: avatar,
+    avatar: avatars,
   });
 
-  emitEvent(req, ALERT, allMembers, `Welcome to ${name} group.`);
+  emitEvent(req, ALERT, allMembers, { message: `Welcome to ${name} group.` });
   emitEvent(req, REFETCH_CHATS, members);
 
   res.status(201).json({
@@ -127,12 +137,10 @@ const addMembers = TryCatch(async (req, res, next) => {
 
   const allUsersName = allNewMembers.map((item) => item.name).join(",");
 
-  emitEvent(
-    req,
-    ALERT,
-    chat.members,
-    `Follwing user have been added to the group : ${allUsersName}`
-  );
+  emitEvent(req, ALERT, chat.members, {
+    members: `Follwing user have been added to the group : ${allUsersName}`,
+    chatId,
+  });
   emitEvent(req, REFETCH_CHATS, chat.members);
 
   return res.status(200).json({
@@ -164,12 +172,10 @@ const removeMember = TryCatch(async (req, res, next) => {
 
   chat.save({ validateModifiedOnly: true });
 
-  emitEvent(
-    req,
-    ALERT,
-    chat.members,
-    `${removedUser} has been removed from the group.`
-  );
+  emitEvent(req, ALERT, chat.members, {
+    message: `User ${removedUser.name} has been removed from the group`,
+    chatId,
+  });
   emitEvent(req, REFETCH_CHATS, allMembers);
 
   return res.status(200).json({
@@ -207,7 +213,10 @@ const leaveGroup = TryCatch(async (req, res, next) => {
 
   await chat.save({ validateModifiedOnly: true });
 
-  emitEvent(req, ALERT, chat.members, `${user} has left the group.`);
+  emitEvent(req, ALERT, chat.members, {
+    message: `${user} has left the group.`,
+    chatId,
+  });
   emitEvent(req, REFETCH_CHATS, chat.members);
 
   return res.status(200).json({

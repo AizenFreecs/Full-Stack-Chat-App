@@ -4,17 +4,20 @@ const userMessage = "self-end bg-green-200";
 const friendMessage = "self-start bg-blue-200";
 import { fileFormatChecker } from "@/lib/features";
 import ShowAttachement from "./ShowAttachement";
+import { motion } from "framer-motion";
 
 function MessageComponent({ message, user }) {
   const { sender, content, attachements = [], createdAt } = message;
   const sameSender = sender?._id === user?._id;
   const messageRecievedTime = moment(createdAt).fromNow();
-  
+
   return (
-    <div
+    <motion.div
       className={` ${
         sameSender ? userMessage : friendMessage
-      } rounded-md p-2 w-fit`}
+        } rounded-md p-2 w-fit`}
+      initial={{ opacity: 0, x: "-100%" }}
+      whileInView={{opacity:1,x:0}}
     >
       {!sameSender && <h1 className=" text-cyan-600 text-md">{sender.name}</h1>}
       {content && <p className="text-sm py-1">{content}</p>}
@@ -22,7 +25,7 @@ function MessageComponent({ message, user }) {
         attachements.map((item, index) => {
           const url = item.url;
           const fileType = fileFormatChecker(url);
-          
+
           return (
             <div key={index}>
               <a href={url} target="_blank" download className="text-black">
@@ -32,7 +35,7 @@ function MessageComponent({ message, user }) {
           );
         })}
       <p className=" text-xs text-gray-700 ">{messageRecievedTime}</p>
-    </div>
+    </motion.div>
   );
 }
 

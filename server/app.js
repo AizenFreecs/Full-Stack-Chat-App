@@ -7,7 +7,15 @@ import { Server } from "socket.io";
 import chatRoutes from "./routes/chat.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import { createServer } from "http";
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT, START_TYPING, STOP_TYPING } from "./constants/events.js";
+import {
+  CHAT_JOINED,
+  CHAT_LEFT,
+  NEW_MESSAGE,
+  NEW_MESSAGE_ALERT,
+  ONLINE_USERS,
+  START_TYPING,
+  STOP_TYPING,
+} from "./constants/events.js";
 import { v4 as uuid } from "uuid";
 import { getSockets } from "./utils/helper.js";
 import { Message } from "./models/message.model.js";
@@ -35,10 +43,10 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: corsOptions,
 });
-app.set("io",io)
+app.set("io", io);
+
 const userSocketIds = new Map();
-
-
+const onlineUsers = new Set();
 
 // Midllewares
 app.use(cors(corsOptions));
@@ -54,7 +62,6 @@ app.get("/", (req, res) => {
 
 // Socket IO from here
 io.use((socket, next) => {
- 
   cookieParser()(socket.request, socket.request.res, async (err) => {
     await socketAuthenticator(err, socket, next);
   });
@@ -62,12 +69,11 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   const user = socket.user;
- 
+
   userSocketIds.set(user._id.toString(), socket.id);
 
-  console.log("A user connected", userSocketIds);
+  /* console.log("A user connected", userSocketIds); */
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
-    console.log(message)
     const messageForRealTime = {
       content: message,
       _id: uuid(),
@@ -105,17 +111,35 @@ io.on("connection", (socket) => {
   socket.on(START_TYPING, ({ members, chatId }) => {
     const membersSockets = getSockets(members);
     socket.to(membersSockets).emit(START_TYPING, { chatId });
-  })
+  });
 
   socket.on(STOP_TYPING, ({ members, chatId }) => {
     const membersSockets = getSockets(members);
-    
+
     socket.to(membersSockets).emit(STOP_TYPING, { chatId });
-  })
+  });
+
+  socket.on(CHAT_JOINED, ({ userId, members }) => {
+    onlineUsers.add(userId?.toString());
+    console.log(members);
+    if (members) {
+      const membersSocket = getSockets(members);
+      io.to(membersSocket).emit(ONLINE_USERS, Array.from(onlineUsers));
+    }
+  });
+
+  socket.on(CHAT_LEFT, ({ userId, members }) => {
+    onlineUsers.delete(userId.toString());
+    if (members) {
+      const membersSocket = getSockets(members);
+      io.to(membersSocket).emit(ONLINE_USERS, Array.from(onlineUsers));
+    }
+  });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected", socket.id);
+    /*  console.log("User disconnected", socket.id); */
     userSocketIds.delete(user._id.toString());
+    onlineUsers.delete(user._id.toString());
   });
 });
 app.use(errorMiddleware);

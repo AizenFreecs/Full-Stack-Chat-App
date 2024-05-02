@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { NEW_MESSAGE_ALERT } from "@/constants/events";
 
 const initialState = {
-  notificationCount: 0,
+  notificationCount: getOrSaveFromStorage({key:"notificationCount",get:true}) || 0,
   newMessagesAlert: getOrSaveFromStorage({
     key: NEW_MESSAGE_ALERT,
     get: true,

@@ -40,12 +40,14 @@ function SignupForm({ toggleLogin }) {
       bio: "",
     },
   });
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmitForm = async (formData) => {
+    setIsLoading(true);
+    const toastId = toast.loading("Creating account...");
     const formDataToSend = new FormData();
-    
-  
+
     // Append the form fields to the FormData object
     for (const [key, value] of Object.entries(formData)) {
       if (key === "avatar") {
@@ -57,7 +59,7 @@ function SignupForm({ toggleLogin }) {
         formDataToSend.append(key, value);
       }
     }
-  
+
     const config = {
       withCredentials: true,
       headers: {
@@ -65,17 +67,25 @@ function SignupForm({ toggleLogin }) {
       },
     };
 
-    console.log(formDataToSend)
-  
+    console.log(formDataToSend);
+
     try {
-      const {data} = await axios.post(`${server}/api/user/register`, formDataToSend, config);
-      console.log(data.user)
-      dispatch(userExists(data.user))
-      toast.success(data.message);
-      
+      const { data } = await axios.post(
+        `${server}/api/user/register`,
+        formDataToSend,
+        config
+      );
+      dispatch(userExists(data.user));
+      toast.success(data.message, {
+        id: toastId,
+      });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Something went wrong.");
+      toast.error(error?.response?.data?.message || "Something went wrong.", {
+        id: toastId,
+      });
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -196,7 +206,11 @@ function SignupForm({ toggleLogin }) {
             <span className="text-red-500">{errors.password.message}</span>
           )}
 
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-500">
+          <Button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-500"
+            disabled={isLoading}
+          >
             SignUp
           </Button>
           <h2 className="text-center text-md">OR</h2>
@@ -204,6 +218,7 @@ function SignupForm({ toggleLogin }) {
             variant="link"
             className="text-green-600 -mt-4"
             onClick={toggleLogin}
+            disabled={isLoading}
           >
             Login Instead
           </Button>

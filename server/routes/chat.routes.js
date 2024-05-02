@@ -13,7 +13,7 @@ import {
   sendAttachements,
   getMessages,
 } from "../controllers/chat.controllers.js";
-import { multerAttachement } from "../middlewares/multer.js";
+import { multerAttachement, userAvatar } from "../middlewares/multer.js";
 import {
   addMembersValidator,
   getChatIdValidator,
@@ -28,7 +28,7 @@ const app = express.Router();
 
 app.use(isAuthenticated);
 
-app.post("/newgroup", newGroupValidator(), validateHandler, newGroupChat);
+app.post("/newgroup",userAvatar, newGroupValidator(), validateHandler, newGroupChat);
 app.get("/mychats", getMyChats);
 app.get("/mygroups", getMyGroups);
 app.put("/addmembers", addMembersValidator(), validateHandler, addMembers);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -29,9 +30,11 @@ function LoginForm({ toggleLogin }) {
     },
   });
   const dispatch = useDispatch();
-
+  const [isLoading, setIsLoading] = useState(false)
+  
   const handleSubmitForm = async (formdata) => {
-    console.log(formdata);
+    setIsLoading(true)
+    const toastId = toast.loading("Logging in...")
     const config = {
       withCredentials: true,
       headers: {
@@ -55,13 +58,14 @@ function LoginForm({ toggleLogin }) {
       expirationDate.setDate(expirationDate.getDate() + 7); // Set cookie expiration for 7 days
       const cookieOptions = `path=/; expires=${expirationDate.toUTCString()}; SameSite=none; Secure`;
       document.cookie = `login-token=${data.token}; ${cookieOptions}`;
-      console.log(data);
 
       dispatch(userExists(data.user));
-      toast.success(data.message);
+      toast.success(data.message,{id:toastId});
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Something went wrong.");
+      toast.error(error?.response?.data?.message || "Something went wrong.",{id:toastId});
       console.log(error);
+    } finally {
+      setIsLoading(false)
     }
   };
   return (
@@ -108,7 +112,7 @@ function LoginForm({ toggleLogin }) {
             <span className="text-red-500">{errors.password.message}</span>
           )}
 
-          <Button type="submit" className="bg-green-600 hover:bg-green-500">
+          <Button type="submit" className="bg-green-600 hover:bg-green-500" disabled={isLoading}>
             Login
           </Button>
           <h2 className="text-center text-md">OR</h2>
@@ -116,6 +120,7 @@ function LoginForm({ toggleLogin }) {
             variant="link"
             className="text-blue-600 -mt-4"
             onClick={toggleLogin}
+            disabled={isLoading}
           >
             Sign Up Instead
           </Button>

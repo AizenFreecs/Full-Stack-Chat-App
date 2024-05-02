@@ -44,11 +44,12 @@ function FileMenu({ chatId }) {
     dispatch(setUploadingLoader(true));
 
     const toastId = toast.loading(`Sending ${key}...`);
-
+    
     try {
       const myForm = new FormData();
       myForm.append("chatId", chatId);
       files.forEach((file) => myForm.append("files", file));
+     
       const res = await sendAttachements(myForm);
       if (res.data) toast.success(`${key} sent successfully`, { id: toastId });
       else toast.error(`Failed to send ${key}`, { id: toastId });
