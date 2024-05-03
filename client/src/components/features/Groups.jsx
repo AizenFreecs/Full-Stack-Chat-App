@@ -9,10 +9,12 @@ import {
   useRenameGroupMutation,
 } from "@/redux/api/api";
 import { Separator } from "@radix-ui/react-separator";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { MdAdd, MdDone, MdEdit } from "react-icons/md";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { LayoutLoader } from "../layout/Loaders";
 import UserCard from "../shared/UserCard";
 import { Button } from "../ui/button";
@@ -20,7 +22,6 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
 import GroupList from "./GroupList";
-import toast from "react-hot-toast";
 
 function Groups() {
   const chatId = useSearchParams()[0].get("group");
@@ -45,11 +46,7 @@ function Groups() {
     useRemoveGroupMemberMutation
   );
 
-  const [deleteGroup, isLoadingDeleteGroup] = useAsyncMutation(
-    useDeleteChatMutation
-  );
-
-  console.log(groupDetails.data);
+  const [deleteGroup] = useAsyncMutation(useDeleteChatMutation);
 
   const errors = [
     { isError: myGroups.isError, error: myGroups.error },
@@ -72,7 +69,6 @@ function Groups() {
   const onGroupSelectHandler = (name) => {
     setIsGroupOpen(true);
     setGroupName((prev) => name);
-    console.log(groupName);
   };
 
   const updateGroupNameHandler = () => {
@@ -85,8 +81,9 @@ function Groups() {
 
   const confirmDeleteHandler = () => {
     deleteGroup("Deleting the group . . . ", chatId);
+    setConfirmDeleteOpen(false);
+    setIsGroupOpen(false);
     navigate("/");
-    toast.success("Group Deleted successfully");
   };
 
   const removeMemberHandler = (id) => {
@@ -101,7 +98,9 @@ function Groups() {
           isGroupOpen ? "hidden sm:block" : "block sm:hidden"
         } md:block p-2 rounded-md`}
       >
-        <h1>My Groups</h1>
+        <h1 className="mb-2 bg-gradient-to-r from-emerald-400 to-fuchsia-600 bg-clip-text text-transparent text-center text-xl">
+          My Groups
+        </h1>
         <div>
           <GroupList
             myGroups={myGroups?.data?.groups}
@@ -110,7 +109,10 @@ function Groups() {
           />
         </div>
       </div>
-      <div
+
+      <motion.div
+        initial={{ opacity: 0, x: "100%" }}
+        whileInView={{ opacity: 1, x: 0 }}
         className={`${isGroupOpen ? "block" : "hidden"} sm:${
           isGroupOpen ? "block" : "hidden"
         } col-span-3 md:col-span-2 p-2`}
@@ -197,7 +199,7 @@ function Groups() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -243,7 +245,6 @@ const AddMembers = ({ chatId = "temp", openCloseHandler }) => {
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
-  console.log(selectedMembers);
 
   const confirmAddFriendHandler = () => {
     addGroupMember("Group Updated", {

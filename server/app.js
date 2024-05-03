@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
 
   userSocketIds.set(user._id.toString(), socket.id);
 
-  /* console.log("A user connected", userSocketIds); */
+ 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
     const messageForRealTime = {
       content: message,
@@ -121,7 +121,7 @@ io.on("connection", (socket) => {
 
   socket.on(CHAT_JOINED, ({ userId, members }) => {
     onlineUsers.add(userId?.toString());
-    console.log(members);
+   
     if (members) {
       const membersSocket = getSockets(members);
       io.to(membersSocket).emit(ONLINE_USERS, Array.from(onlineUsers));
@@ -137,7 +137,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    /*  console.log("User disconnected", socket.id); */
+   
     userSocketIds.delete(user._id.toString());
     onlineUsers.delete(user._id.toString());
   });

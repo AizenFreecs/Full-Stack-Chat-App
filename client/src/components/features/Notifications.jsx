@@ -14,8 +14,7 @@ import { setIsOpenNotifications } from "@/redux/reducers/misc";
 function Notifications() {
   const navigate = useNavigate();
   const { isloading, data, error, isError } = useGetNotificationsQuery();
-
-  console.log(data);
+  
   const [acceptRequest] = useAsyncMutation(useAcceptFriendRequestMutation);
   const friendRequestHandler = async ({ _id, accept }) => {
     await acceptRequest("Accepting friend request . . .", {

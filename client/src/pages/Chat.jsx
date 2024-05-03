@@ -16,15 +16,15 @@ import {
 import { useErrors, useSocketEvents } from "@/hooks/hook";
 import { useChatDetailsQuery, useGetOldMessagesQuery } from "@/redux/api/api";
 import { removeNewMessagesAlert } from "@/redux/reducers/chat";
-import { useCallback, useEffect,  useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate,useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getSocket } from "../../Socket";
 
 function Chat() {
-  const params = useParams()
-  const chatId = params.chatId
+  const params = useParams();
+  const chatId = params.chatId;
   const socket = getSocket();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -34,8 +34,6 @@ function Chat() {
   const bottomRef = useRef(null);
   const navigate = useNavigate();
   const containerRef = useRef(null);
-
-
 
   const [IamTyping, setIamTyping] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
@@ -47,7 +45,7 @@ function Chat() {
     { isError: chatDetails.isError, error: chatDetails.error },
     { isError: oldMessagesChunk.isError, error: oldMessagesChunk.error },
   ];
-  
+
   const members = chatDetails.data?.chat?.members;
 
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
@@ -57,7 +55,6 @@ function Chat() {
     setPage,
     oldMessagesChunk.data?.messages
   );
-
 
   const messageOnChangeHandler = (e) => {
     setMessage(e.target.value);
@@ -74,7 +71,6 @@ function Chat() {
   };
 
   useEffect(() => {
-    
     socket.emit(CHAT_JOINED, { userId: user._id, members });
     dispatch(removeNewMessagesAlert(chatId));
 
@@ -107,7 +103,7 @@ function Chat() {
   const newMessageListener = useCallback(
     (data) => {
       if (data.chatId !== chatId) return;
-      console.log(data, chatId);
+      
       setMessages((prev) => [...prev, data.message]);
     },
     [chatId]
@@ -115,9 +111,8 @@ function Chat() {
 
   const startTypingListener = useCallback(
     (data) => {
-      console.log(data);
+      
       if (data.chatId !== chatId) return;
-      console.log("Start Typing", data);
       setUserTyping(true);
     },
     [chatId]
@@ -125,9 +120,9 @@ function Chat() {
 
   const stopTypingListener = useCallback(
     (data) => {
-      console.log(data);
+    
       if (data.chatId !== chatId) return;
-      console.log("Stop Typing", data);
+
       setUserTyping(false);
     },
     [chatId]
@@ -162,11 +157,11 @@ function Chat() {
 
   useErrors(errors);
   const allMessages = [...oldMessages, ...messages];
-  return  (
-    <main className="w-full h-full max-h-[calc(100vh-4rem)] bg-white ">
+  return (
+    <main className="w-full h-full max-h-[calc(100vh-4rem)] bg-transparent mr-2 ">
       <div
         ref={containerRef}
-        className="w-full h-[90%] max-h-[90%] flex flex-col item-center p-[1rem] bg-slate-300 overflow-x-hidden overflow-y-auto"
+        className="w-full h-[90%] max-h-[90%] flex flex-col item-center p-[1rem] rounded-xl bg-gradient-to-tl from-indigo-300 via-slate-300 to-sky-300 overflow-x-hidden overflow-y-auto"
       >
         {allMessages.map((item) => (
           <MessageComponent message={item} user={user} key={item._id} />
@@ -176,10 +171,10 @@ function Chat() {
         <div ref={bottomRef} />
       </div>
       <form
-        className="h-[10%] w-full flex items-center p-2 px-4 gap-4"
+        className="h-[10%] w-full  flex items-center py-2 gap-4"
         onSubmit={submitHandler}
       >
-        <div className="flex w-full h-full items-center rounded-lg border-2 border-gray-400 ">
+        <div className="flex w-full h-full items-center rounded-lg bg-gradient-to-r from-gray-200 via-slate-50 to-gray-200 border-2 border-gray-400 ">
           <FileMenu chatId={chatId} />
           <Input
             placeholder="Type your Message"

@@ -5,7 +5,7 @@ import { transformImage } from "@/lib/features";
 import { motion } from "framer-motion";
 import AvatarCard from "./AvatarCard";
 
-const sameSenderCss = "bg-green-500 text-white hover:bg-green-500"
+const sameSenderCss = "bg-gradient-to-r from-teal-300 to-green-500 shadow-xl text-white hover:bg-green-500"
 
 function ChatItem({
   avatar = [],
@@ -27,7 +27,7 @@ function ChatItem({
       <div
         className={`items-center p-[1rem] gap-[1rem] ${
           sameSender ? sameSenderCss : ""
-        }  relative rounded-xl mx-2 mt-2 ${sameSender ? "":"hover:bg-gray-300"} `}
+        }  relative rounded-xl mx-2 mt-2 ${sameSender ? "":"hover:bg-gradient-to-r from-gray-300 to-stone-500"} `}
       >
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-4 p-1 rounded-full">

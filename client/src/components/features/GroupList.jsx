@@ -2,13 +2,19 @@ import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { transformImage } from "@/lib/features";
+import AvatarCard from "../shared/AvatarCard";
 
 function GroupList({ myGroups = [], chatId, handler }) {
   return (
-    <div className="flex flex-col gap-4" >
+    <div className="flex flex-col gap-4">
       {myGroups.length > 0 ? (
         myGroups.map((item) => (
-          <GroupListItems group={item} chatId={chatId} key={item._id} handler={handler} />
+          <GroupListItems
+            group={item}
+            chatId={chatId}
+            key={item._id}
+            handler={handler}
+          />
         ))
       ) : (
         <h1 className="text-center p-4">You have not joined any Groups.</h1>
@@ -24,15 +30,12 @@ const GroupListItems = memo(({ group, chatId, handler }) => {
     <Link
       to={`?group=${_id}`}
       onClick={(e) => {
-          if (chatId === _id) e.preventDefault()
-          handler(name)
+        if (chatId === _id) e.preventDefault();
+        handler(name);
       }}
     >
-      <div className="flex my-2 items-center gap-4" >
-        <Avatar>
-          <AvatarImage src={transformImage(avatar.url)} />
-          <AvatarFallback>NF</AvatarFallback>
-        </Avatar>
+      <div className="flex my-2 items-center gap-4">
+        <AvatarCard avatar={avatar} groupChat={true} />
         <h1>{name}</h1>
       </div>
     </Link>

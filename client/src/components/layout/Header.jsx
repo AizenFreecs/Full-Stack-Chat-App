@@ -19,6 +19,7 @@ import ChatList from "../features/ChatList";
 import { useDispatch, useSelector } from "react-redux";
 import { resetNotificationCount } from "@/redux/reducers/chat";
 import { setIsOpenNotifications } from "@/redux/reducers/misc";
+import myLogo from "../../assets/mylogo.png";
 
 function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
   const dispatch = useDispatch();
@@ -28,6 +29,7 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
   const { user } = useSelector((state) => state.auth);
   const { notificationCount } = useSelector((state) => state.chat);
   const [isNewGroup, setIsNewGroup] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { isOpenNotifications } = useSelector((state) => state.misc);
 
   const {} = useSelector((state) => state.misc);
@@ -45,16 +47,16 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
   };
 
   return (
-    <header className="h-[4rem] bg-orange-400">
+    <header className="h-[3.5rem] bg-gradient-to-r from-blue-400 md:from-[#602f62] to-cyan-700 md:to-[#613063] rounded-lg mx-2 my-1">
       <nav className=" flex  lg:flex-row justify-between z-50 h-full py-2  px-4">
         <div className="flex justify-between w-full lg:w-auto">
-          <span className="items-center pt-3 hidden md:block">
-            Aizen's Chat
+          <span className="items-center hidden md:block">
+            <img src={myLogo} className="h-[3.5rem] w-full -my-2" /> 
           </span>
 
           <Drawer>
             <DrawerTrigger>
-              <div className="hover:bg-orange-500 rounded-full md:hidden p-2 cursor-pointer">
+              <div className="hover:bg-blue-400 rounded-full md:hidden p-2 cursor-pointer text-white">
                 <CiMenuBurger
                   className="h-[1.5rem] w-[1.5rem]"
                   onClick={handleNotifications}
@@ -62,10 +64,11 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
                 />
               </div>
             </DrawerTrigger>
-            <DrawerContent className="bg-orange-400">
+            <DrawerContent className="bg-gradient-to-r from-violet-200 to-sky-300 pb-2">
               {isLoading ? (
                 <Skeleton />
               ) : (
+                  
                 <ChatList
                   chats={data.chats}
                   chatId={chatId}
@@ -83,7 +86,7 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
         <div className="flex items-center gap-4 justify-between text-white ">
           <Dialog>
             <DialogTrigger>
-              <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="hover:scale-125 rounded-full p-2 cursor-pointer">
                 <IoIosSearch
                   className="h-[1.5rem] w-[1.5rem]"
                   onClick={handleSearch}
@@ -98,7 +101,7 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
 
           <Dialog open={isNewGroup} onOpenChange={setIsNewGroup}>
             <DialogTrigger>
-              <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="hover:scale-125  rounded-full p-2 cursor-pointer">
                 <CiCirclePlus
                   className="h-[1.5rem] w-[1.5rem]"
                   title="New Group"
@@ -112,7 +115,7 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
 
           <Dialog>
             <DialogTrigger>
-              <div className="hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="hover:scale-125 rounded-full p-2 cursor-pointer">
                 <MdGroups
                   className="h-[1.5rem] w-[1.5rem]"
                   title="Manage Group"
@@ -126,7 +129,7 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
 
           <Popover>
             <PopoverTrigger>
-              <div className="relative hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="relative hover:scale-125 rounded-full p-2 cursor-pointer">
                 <FaBell
                   className="h-[1.5rem] w-[1.5rem]"
                   title="Notifications"
@@ -144,9 +147,14 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
             </PopoverContent>
           </Popover>
 
-          <Drawer direction="right" className="outline-none  ">
+          <Drawer
+            direction="right"
+            className="outline-none"
+            open={isProfileOpen}
+            onOpenChange={setIsProfileOpen}
+          >
             <DrawerTrigger asChild>
-              <div className="relative hover:bg-orange-500 rounded-full p-2 cursor-pointer">
+              <div className="relative hover:scale-125 rounded-full p-2 cursor-pointer">
                 <h1>
                   <CgProfile
                     className="h-[1.5rem] w-[1.5rem]"
@@ -156,7 +164,7 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
               </div>
             </DrawerTrigger>
             <DrawerContent className="top-0 right-0 left-auto px-4 mt-0 bg-transparent border-none  md:w-[500px] w-[80vw] outline-none rounded-none">
-              <ProfileCard />
+              <ProfileCard openCloseHandler={setIsProfileOpen} />
             </DrawerContent>
           </Drawer>
         </div>

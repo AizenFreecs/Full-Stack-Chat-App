@@ -131,7 +131,7 @@ const addMembers = TryCatch(async (req, res, next) => {
   chat.members.push(...newMembers);
 
   if (chat.members.length > 40)
-    return next(new ErrorHandler("Memeber limit reached", 400));
+    return next(new ErrorHandler("Member limit reached", 400));
 
   await chat.save({ validateModifiedOnly: true });
 
@@ -228,7 +228,7 @@ const leaveGroup = TryCatch(async (req, res, next) => {
 const sendAttachements = TryCatch(async (req, res, next) => {
   const { chatId } = req.body;
   const files = req.files || [];
-  console.log(files);
+  
 
   if (files.length < 1)
     return next(new ErrorHandler("Please upload attachements", 404));
@@ -248,7 +248,7 @@ const sendAttachements = TryCatch(async (req, res, next) => {
     content: "",
     attachements,
     sender: {
-      id: user._id,
+      _id: user._id,
       name: user.name,
     },
     chat: chatId,
@@ -329,17 +329,17 @@ const renameGroup = TryCatch(async (req, res, next) => {
 const deleteChat = TryCatch(async (req, res, next) => {
   const chatId = req.params.id;
 
-  const chat = Chat.findById(chatId);
+  const chat = await Chat.findById(chatId);
   if (!chat) next(new ErrorHandler("Chat not found.", 404));
 
   const members = chat.members;
 
-  if (chat.groupChat && chat.create.toString() !== req.user.toString())
+  if (chat.groupChat && chat.creator.toString() !== req.user.toString())
     return next(
       new ErrorHandler("You are not allowed to delete the group.", 403)
     );
 
-  if (chat.groupChat && !chat.members.includes(req.user.toString()))
+  if (!chat.groupChat && !chat.members.includes(req.user.toString()))
     return next(
       new ErrorHandler("You are not allowed to delete the group.", 403)
     );
@@ -353,7 +353,7 @@ const deleteChat = TryCatch(async (req, res, next) => {
 
   const public_ids = [];
 
-  msgsWithAttachements.forEach((attachements) => {
+  msgsWithAttachements.forEach(({ attachements }) => {
     attachements.forEach(({ public_id }) => public_ids.push(public_id));
   });
 
@@ -368,7 +368,7 @@ const deleteChat = TryCatch(async (req, res, next) => {
 
   return res.status(200).json({
     success: true,
-    message: "Chat deleted successfully",
+    message: `${chat.groupChat ? "Group":"Chat"} deleted successfully`,
   });
 });
 

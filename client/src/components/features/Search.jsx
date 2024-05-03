@@ -36,7 +36,7 @@ function Search() {
   return (
     <section>
       <div className="text-xl text-center flex flex-col items-center gap-2">
-        <h1>Find More People</h1>
+        <h1 className="bg-gradient-to-r from-emerald-400 to-fuchsia-600 bg-clip-text text-transparent">Find More People</h1>
         <div className="flex gap-2 items-center border border-gray-500 rounded-md p-2 w-full">
           <CiSearch className="h-[1.5rem] w-[1.5rem]" />
           <Input

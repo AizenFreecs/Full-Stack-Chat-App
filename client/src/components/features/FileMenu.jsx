@@ -37,7 +37,6 @@ function FileMenu({ chatId }) {
   };
   const fileChangeHandler = async (e, key) => {
     const files = Array.from(e.target.files);
-    console.log(files);
     if (files.length <= 0) return;
     if (files.length > 10)
       return toast.error(`Only maximum 10 ${key} files can be sent a time`);

@@ -134,7 +134,7 @@ const acceptFriendRequest = TryCatch(async (req, res, next) => {
     .populate("sender", "name")
     .populate("receiver", "name");
   
-  console.log(request)
+  
 
   if (!request) return next(new ErrorHandler("Request not found.", 404));
   if (request.receiver._id.toString() !== req.user.toString())

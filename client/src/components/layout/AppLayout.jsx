@@ -21,7 +21,6 @@ import ChatList from "../features/ChatList";
 import { Skeleton } from "../ui/skeleton";
 import Header from "./Header";
 
-
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
@@ -36,7 +35,6 @@ const AppLayout = () => (WrappedComponent) => {
     );
 
     const { isLoading, data, isError, error, refetch } = useMyChatsQuery("");
-    
 
     useErrors([{ isError, error }]);
 
@@ -50,7 +48,6 @@ const AppLayout = () => (WrappedComponent) => {
 
     const handleDeleteChat = (e, _id, groupChat) => {
       dispatch(setSelectedDeleteChat({ chatId: _id, groupChat }));
-      console.log("Chat Deleted", _id, groupChat);
     };
 
     const newMessageAlertListener = useCallback(
@@ -83,10 +80,14 @@ const AppLayout = () => (WrappedComponent) => {
     useSocketEvents(socket, eventHandlers);
     return (
       <div>
-        <Header handleDeleteChat={handleDeleteChat} newMessagesAlert={newMessagesAlert} onlineUsers={onlineUsers} />
+        <Header
+          handleDeleteChat={handleDeleteChat}
+          newMessagesAlert={newMessagesAlert}
+          onlineUsers={onlineUsers}
+        />
 
         <div className="grid grid-cols-5 h-[calc(100vh-4rem)]">
-          <div className="col-span-1  hidden sm:block  bg-gray-200">
+          <div className="col-span-1 rounded-xl ml-2 bg-gradient-to-r from-violet-200 to-sky-300 mb-2  hidden sm:block">
             {isLoading ? (
               <Skeleton />
             ) : (
@@ -99,7 +100,7 @@ const AppLayout = () => (WrappedComponent) => {
               />
             )}
           </div>
-          <div className="col-span-5 sm:col-span-4 md:col-span-4  bg-gray-300">
+          <div className="col-span-5 mx-2 sm:col-span-4 md:col-span-4 bg-transparent">
             <WrappedComponent {...props} chatId={chatId} />
           </div>
         </div>
