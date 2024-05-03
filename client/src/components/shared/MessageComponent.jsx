@@ -10,7 +10,7 @@ function MessageComponent({ message, user }) {
   const { sender, content, attachements = [], createdAt } = message;
   const sameSender = sender?._id === user?._id;
   const messageRecievedTime = moment(createdAt).fromNow();
-  console.log(message.sender.id,user._id)
+
  
 
   return (
