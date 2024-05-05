@@ -1,5 +1,6 @@
 import React from "react";
 import { Skeleton } from "../ui/skeleton";
+import loadingCircle from "../../assets/loadingCircle.gif";
 
 const LayoutLoader = () => {
   return (
@@ -7,15 +8,8 @@ const LayoutLoader = () => {
       <div className="col-span-1  hidden sm:block p-4 ">
         <Skeleton className="h-full p-4" />
       </div>
-      <div className="col-span-5 sm:col-span-4 md:col-span-3 flex flex-col gap-4 p-4 ">
-        <Skeleton className="h-14" />
-        <Skeleton className="h-14" />
-        <Skeleton className="h-14" />
-        <Skeleton className="h-14" />
-        <Skeleton className="h-14" />
-        <Skeleton className="h-14" />
-        <Skeleton className="h-14" />
-        <Skeleton className="h-14" />
+      <div className="col-span-5 sm:col-span-4 md:col-span-3 flex flex-col items-center align-middle gap-4 p-4 ">
+       <img src={loadingCircle} className="mt-[15rem] w-[15rem] h-[15rem]"/>
       </div>
       <div className="col-span-1 hidden md:block p-4 ">
         <Skeleton className="h-full p-4" />

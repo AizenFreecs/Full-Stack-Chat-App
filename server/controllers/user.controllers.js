@@ -15,7 +15,6 @@ import { getOtherMember } from "../utils/helper.js";
 
 // Create user and save to database and cookie
 const newUser = TryCatch(async (req, res, next) => {
- 
   const { name, username, password, bio } = req.body;
   const file = req.file;
   if (!file)
@@ -86,9 +85,11 @@ const searchUser = TryCatch(async (req, res) => {
 
   // getting rest of the users in the database
   const allUsersExceptSelfandFriends = await User.find({
-    _id: { $nin: myFriends },
+    _id: { $nin: [...myFriends, req.user] },
     name: { $regex: name, $options: "i" },
   });
+
+  
 
   // list of queried users
   const users = allUsersExceptSelfandFriends.map(({ _id, name, avatar }) => ({
@@ -133,8 +134,6 @@ const acceptFriendRequest = TryCatch(async (req, res, next) => {
   const request = await Request.findById(requestId)
     .populate("sender", "name")
     .populate("receiver", "name");
-  
-  
 
   if (!request) return next(new ErrorHandler("Request not found.", 404));
   if (request.receiver._id.toString() !== req.user.toString())
