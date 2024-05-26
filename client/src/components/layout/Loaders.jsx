@@ -1,19 +1,59 @@
 import React from "react";
 import { Skeleton } from "../ui/skeleton";
-import loadingCircle from "../../assets/loadingCircle.gif";
 
 const LayoutLoader = () => {
   return (
-    <div className="grid grid-cols-5 h-[calc(100vh)]">
-      <div className="col-span-1  hidden sm:block p-4 ">
-        <Skeleton className="h-full p-4" />
-      </div>
-      <div className="col-span-5 sm:col-span-4 md:col-span-3 flex flex-col items-center align-middle gap-4 p-4 ">
-       <img src={loadingCircle} className="mt-[15rem] w-[15rem] h-[15rem]"/>
-      </div>
-      <div className="col-span-1 hidden md:block p-4 ">
-        <Skeleton className="h-full p-4" />
-      </div>
+    <div className="flex mt-[14rem] justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="240" height="240">
+        <radialGradient
+          id="a12"
+          cx=".66"
+          fx=".66"
+          cy=".3125"
+          fy=".3125"
+          gradientTransform="scale(1.5)"
+        >
+          <stop offset="0" stopColor="#2848FF"></stop>
+          <stop offset=".3" stopColor="#2848FF" stopOpacity=".9"></stop>
+          <stop offset=".6" stopColor="#2848FF" stopOpacity=".6"></stop>
+          <stop offset=".8" stopColor="#2848FF" stopOpacity=".3"></stop>
+          <stop offset="1" stopColor="#2848FF" stopOpacity="0"></stop>
+        </radialGradient>
+        <circle
+          transform-origin="center"
+          fill="none"
+          stroke="url(#a12)"
+          strokeWidth="23"
+          strokeLinecap="round"
+          strokeDasharray="200 1000"
+          strokeDashoffset="0"
+          cx="100"
+          cy="100"
+          r="70"
+        >
+          <animateTransform
+            type="rotate"
+            attributeName="transform"
+            calcMode="spline"
+            dur="2"
+            values="360;0"
+            keyTimes="0;1"
+            keySplines="0 0 1 1"
+            repeatCount="indefinite"
+          ></animateTransform>
+        </circle>
+        <circle
+          transform-origin="center"
+          fill="none"
+          opacity=".2"
+          stroke="#2848FF"
+          strokeWidth="23"
+          strokeLinecap="round"
+          cx="100"
+          cy="100"
+          r="70"
+        ></circle>
+      </svg>
     </div>
   );
 };

@@ -56,7 +56,7 @@ function Header({ handleDeleteChat, onlineUsers = [], newMessagesAlert = [] }) {
 
           <Drawer>
             <DrawerTrigger>
-              <div className="hover:bg-blue-400 rounded-full md:hidden p-2 cursor-pointer text-white">
+              <div className="hover:bg-blue-400  rounded-full md:hidden p-2 cursor-pointer text-white">
                 <CiMenuBurger
                   className="h-[1.5rem] w-[1.5rem]"
                   onClick={handleNotifications}
